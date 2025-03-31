@@ -1,0 +1,229 @@
+/* App.css */
+
+/* Base Styling */
+body {
+  background: linear-gradient(to right, #00bcd4, #00ffcc);
+  /* Cyan gradient from left to right */
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  color: white;
+  /* Optional: for better text contrast */
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+h1 {
+  font-size: 2rem;
+  text-align: center;
+  margin-bottom: 30px;
+  color: #1F2937;
+}
+
+button {
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+/* Dark Mode Styles */
+.dark {
+  background-color: #1a202c;
+}
+
+.dark .text-white {
+  color: #f7fafc;
+}
+
+.dark .bg-gray-900 {
+  background-color: #2982a5;
+}
+
+.dark .bg-gray-700 {
+  background-color: #4a5568;
+}
+
+.dark .bg-blue-500 {
+  background-color: #3182ce;
+}
+
+.dark .bg-red-500 {
+  background-color: #e53e3e;
+}
+
+.dark .bg-green-500 {
+  background-color: #38a169;
+}
+
+.dark .text-gray-900 {
+  color: #e2e8f0;
+}
+
+.dark .bg-gray-300 {
+  background-color: #edf2f7;
+}
+
+/* Task Card Styles */
+.task-card {
+  background-color: #f7fafc;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.task-card:hover {
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+.task-card.completed {
+  background-color: #48bb78;
+}
+
+.task-card .task-text {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: #2d3748;
+  transition: all 0.3s ease;
+}
+
+.task-card.completed .task-text {
+  text-decoration: line-through;
+  color: #fff;
+}
+
+.task-card button {
+  background-color: #e53e3e;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 12px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.task-card button:hover {
+  background-color: #c53030;
+  transform: scale(1.1);
+}
+
+/* Input and Button Styles */
+input[type="text"] {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  border: 2px solid #ddd;
+  background-color: #edf2f7;
+  font-size: 1.1rem;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+input[type="text"]:focus {
+  border-color: #3182ce;
+  box-shadow: 0 0 5px rgba(49, 130, 206, 0.6);
+}
+
+button.add-task {
+  background-color: #3182ce;
+  padding: 12px 25px;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+button.add-task:hover {
+  background-color: #2b6cb0;
+  transform: scale(1.05);
+}
+
+/* Dark Mode Toggle Button */
+button.toggle-dark-mode {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background-color: #4a5568;
+  color: rgb(10, 141, 151);
+  border-radius: 50%;
+  padding: 10px 15px;
+  font-size: 1.5rem;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+button.toggle-dark-mode:hover {
+  background-color: #0b8482;
+  transform: scale(1.1);
+}
+
+/* Notification Bar */
+.notification-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #3db0bb;
+  color: white;
+  text-align: center;
+  padding: 12px 0;
+  font-size: 1.2rem;
+  z-index: 1000;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  display: none;
+}
+
+.notification-bar.show {
+  display: block;
+}
+
+/* Transitions */
+.fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+.nav-links {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.nav-links a {
+  color: #ffffff;
+  text-decoration: none;
+  padding: 8px 16px;
+  margin-right: 20px;
+  
+  border-radius: 8px;
+}
+
+.nav-links a:last-child {
+  margin-right: 0;
+  /* Remove margin from the last item */
+}
+
+.nav-links a:hover {
+  background-color: #00bcd4;
+  /* Highlight color on hover */
+}
