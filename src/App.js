@@ -1,136 +1,124 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Route, Link, Routes } from "react-router-dom";
-import './App.css'
-
-
-const Settings = ({ darkMode, setDarkMode }) => {
-  return (
-    <div className={`p-6 ${darkMode ? "bg-gray-800 text-white" : "bg-white text-gray-900"}`}>
-      <h2 className="text-xl font-bold mb-4">Settings</h2>
-      <div className="flex items-center">
-        <label className="mr-4">Enable Dark Mode:</label>
-        <input
-          type="checkbox"
-          checked={darkMode}
-          onChange={() => setDarkMode(!darkMode)}
-          className="toggle-dark-mode"
-        />
-      </div>
-    </div>
-  );
-};
+import { DndProvider, useDrag, useDrop } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import "./App.css";
 
 const App = () => {
-  const [tasks, setTasks] = useState(() => JSON.parse(localStorage.getItem("tasks")) || []);
-  const [taskText, setTaskText] = useState("");
-  const [darkMode, setDarkMode] = useState(localStorage.getItem("darkMode") === "true");
-  const [notification, setNotification] = useState("");
+  const [tasks, setTasks] = useState([]);
+  const [newTask, setNewTask] = useState({ title: "", description: "", dueDate: "", priority: "Low" });
+  const [darkMode, setDarkMode] = useState(false);
+  const [filter, setFilter] = useState("All");
+  const [sort, setSort] = useState("Due Date");
 
+  useEffect(() => {
+    const savedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
+    setTasks(savedTasks);
+    const savedDarkMode = JSON.parse(localStorage.getItem("darkMode")) || false;
+    setDarkMode(savedDarkMode);
+  }, []);
 
-  const addTask = () => {
-    if (!taskText.trim()) return;
-    const newTask = { id: Date.now(), text: taskText, completed: false };
-    setTasks([...tasks, newTask]);
-    setTaskText("");
-    showNotification("Task added!");
-  };
-
-  const toggleTask = (id) => {
-    const updatedTasks = tasks.map((task) => (task.id === id ? { ...task, completed: !task.completed } : task));
-    setTasks(updatedTasks);
-    showNotification("Task updated!");
-  };
-
-  const deleteTask = (id) => {
-    const remainingTasks = tasks.filter((task) => task.id !== id);
-    setTasks(remainingTasks);
-    showNotification("Task deleted!");
-  };
-
-  const showNotification = (message) => {
-    setNotification(message);
-    setTimeout(() => setNotification(""), 3000);
-  };
-
- 
   useEffect(() => {
     localStorage.setItem("tasks", JSON.stringify(tasks));
   }, [tasks]);
 
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", darkMode);
-    localStorage.setItem("darkMode", darkMode);
+    localStorage.setItem("darkMode", JSON.stringify(darkMode));
   }, [darkMode]);
 
+  const addTask = () => {
+    if (!newTask.title.trim()) return;
+    setTasks([...tasks, { ...newTask, id: Date.now(), completed: false }]);
+    setNewTask({ title: "", description: "", dueDate: "", priority: "Low" });
+  };
+
+  const deleteTask = (id) => setTasks(tasks.filter((task) => task.id !== id));
+
+  const toggleComplete = (id) => {
+    setTasks(
+      tasks.map((task) => (task.id === id ? { ...task, completed: !task.completed } : task))
+    );
+  };
+
+  const moveTask = (dragIndex, hoverIndex) => {
+    const updatedTasks = [...tasks];
+    const [movedItem] = updatedTasks.splice(dragIndex, 1);
+    updatedTasks.splice(hoverIndex, 0, movedItem);
+    setTasks(updatedTasks);
+  };
+
+  const filteredTasks = tasks.filter((task) => {
+    if (filter === "Pending") return !task.completed;
+    if (filter === "Completed") return task.completed;
+    return true;
+  });
+
+  const sortedTasks = [...filteredTasks].sort((a, b) => {
+    if (sort === "Due Date") return new Date(a.dueDate) - new Date(b.dueDate);
+    if (sort === "Priority") return ["Low", "Medium", "High"].indexOf(a.priority) - ["Low", "Medium", "High"].indexOf(b.priority);
+    return 0;
+  });
+
   return (
-    <Router>
-      <div className={`min-h-screen flex flex-col items-center p-6 ${darkMode ? "dark bg-gray-900 text-white" : "bg-gray-100 text-gray-900"}`}>
-        
-        {notification && (
-          <div className="notification-bar bg-green-500 text-white p-2 w-full fixed top-0 left-0 flex justify-center items-center text-center">
-            {notification}
-          </div>
-        )}
-
-      
-        <div className="flex justify-between w-full mb-4">
-          <Link to="/" className="p-2 rounded bg-blue-500 text-white">Home</Link>
-          <Link to="/settings" className="p-2 rounded bg-green-500 text-white">Settings</Link>
+    <DndProvider backend={HTML5Backend}>
+      <div className={`task-manager ${darkMode ? "dark" : ""}`}>
+        <h2>Task Manager</h2>
+        <button onClick={() => setDarkMode(!darkMode)}>Toggle Dark Mode</button>
+        <div className="controls">
+          <input type="text" placeholder="Title" value={newTask.title} onChange={(e) => setNewTask({ ...newTask, title: e.target.value })} />
+          <input type="date" value={newTask.dueDate} onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })} />
+          <select value={newTask.priority} onChange={(e) => setNewTask({ ...newTask, priority: e.target.value })}>
+            <option>Low</option>
+            <option>Medium</option>
+            <option>High</option>
+          </select>
+          <button onClick={addTask}>Add Task</button>
         </div>
-
-        <Routes>
-       
-          <Route path="/settings" element={<Settings darkMode={darkMode} setDarkMode={setDarkMode} />} />
-
-         
-          <Route
-            path="/"
-            element={
-              <>
-                <h1 className="text-2xl font-bold mb-4">Task Manager</h1>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    className="border p-2 rounded w-64 bg-gray-200 text-black dark:bg-gray-700 dark:text-white"
-                    placeholder="Enter a task..."
-                    value={taskText}
-                    onChange={(e) => setTaskText(e.target.value)}
-                  />
-                  <button
-                    className="bg-blue-500 text-white p-2 rounded hover:bg-blue-700"
-                    onClick={addTask}
-                  >
-                    Add Task
-                  </button>
-                </div>
-
-                <ul className="mt-4 w-80">
-                  {tasks.map((task) => (
-                    <li
-                      key={task.id}
-                      className={`flex justify-between items-center p-2 mt-2 rounded ${task.completed ? "bg-green-400" : "bg-gray-300"} dark:bg-gray-700`}
-                    >
-                      <span
-                        onClick={() => toggleTask(task.id)}
-                        className={`cursor-pointer ${task.completed ? "line-through" : ""}`}
-                      >
-                        {task.text}
-                      </span>
-                      <button
-                        onClick={() => deleteTask(task.id)}
-                        className="bg-red-500 text-white px-2 rounded"
-                      >
-                        ✖
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </>
-            }
-          />
-        </Routes>
+        <div className="filters">
+          <select onChange={(e) => setFilter(e.target.value)}>
+            <option>All</option>
+            <option>Pending</option>
+            <option>Completed</option>
+          </select>
+          <select onChange={(e) => setSort(e.target.value)}>
+            <option>Due Date</option>
+            <option>Priority</option>
+          </select>
+        </div>
+        <ul>
+          {sortedTasks.map((task, index) => (
+            <Task key={task.id} task={task} index={index} moveTask={moveTask} toggleComplete={toggleComplete} deleteTask={deleteTask} />
+          ))}
+        </ul>
       </div>
-    </Router>
+    </DndProvider>
+  );
+};
+
+const Task = ({ task, index, moveTask, toggleComplete, deleteTask }) => {
+  const [{ isDragging }, drag] = useDrag(() => ({
+    type: "TASK",
+    item: { index },
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging(),
+    }),
+  }));
+
+  const [, drop] = useDrop(() => ({
+    accept: "TASK",
+    hover: (draggedItem) => {
+      if (draggedItem.index !== index) {
+        moveTask(draggedItem.index, index);
+        draggedItem.index = index;
+      }
+    },
+  }));
+
+  return (
+    <li ref={(node) => drag(drop(node))} style={{ opacity: isDragging ? 0.5 : 1 }}>
+      <input type="checkbox" checked={task.completed} onChange={() => toggleComplete(task.id)} />
+      <span>{task.title} - {task.priority} - {task.dueDate}</span>
+      <button onClick={() => deleteTask(task.id)}>Delete</button>
+    </li>
   );
 };
 
